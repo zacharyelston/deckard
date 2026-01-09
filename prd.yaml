@@ -1,0 +1,160 @@
+prd:
+  version: "0.2"
+  name: "Public GitHub Experiments Runner (MTG Deck Tester)"
+  status: "draft"
+  updated_at: "2026-01-09"
+
+  positioning:
+    mvp:
+      tier: "free"
+      repo_support: "public_only"
+      writeback:
+        default: "internal_storage"
+        optional: "download_results"
+      llm_keys:
+        managed_by: "internal_only"
+        user_configurable: false
+    paid:
+      tier: "paid"
+      repo_support: "private_and_public"
+      writeback:
+        default: "pr_to_repo"
+      llm_keys:
+        managed_by: "user_profile"
+        user_configurable: true
+
+  problem_statement: >
+    Users want to iterate on MTG decks and AI pilot policies using files stored in GitHub.
+    They want a simple workflow: point the app at a folder in a repo, run small simulations,
+    and receive reproducible results with policy-defined analytics.
+
+  goals:
+    mvp:
+      - "Users can sign up and log in."
+      - "User can provide a public GitHub repo URL and workspace_root folder."
+      - "App discovers experiments under workspace_root/experiments/*/experiment.yaml."
+      - "App validates deck/policy/experiment YAML files and shows errors."
+      - "User can run 1–10 games per experiment."
+      - "App stores results internally and renders analytics report."
+      - "User can download results.yaml and report.md."
+      - "Runs record repo URL + commit SHA + seed for reproducibility."
+      - "LLM provider keys are internal-only during MVP."
+    paid:
+      - "Connect private repos via GitHub App or PAT."
+      - "Write results as PRs to the repo."
+      - "User-managed LLM keys in profile."
+      - "Higher simulation limits and team collaboration."
+
+  non_goals:
+    mvp:
+      - "Private repo support."
+      - "Storing user LLM keys."
+      - "Guaranteed support for all MTG mechanics."
+      - "Interactive gameplay."
+      - "Unlimited simulations."
+      - "Repo writeback required for MVP."
+
+  user_stories:
+    - id: run_public_experiment
+      story: "As a user, I want to link a public repo and run an experiment so I can see results quickly."
+      acceptance_criteria:
+        - "Given a valid public repo + folder, the app finds experiments and validates references."
+        - "Given a valid experiment, the user can run it and see a results report."
+        - "User can download results.yaml."
+    - id: validation_feedback
+      story: "As a user, I want clear validation errors so I can fix YAML issues quickly."
+      acceptance_criteria:
+        - "Errors indicate filename, line (if possible), and actionable messages."
+        - "Broken refs show resolved path attempts."
+    - id: reproducible_runs
+      story: "As a user, I want reproducible results so I can compare changes over time."
+      acceptance_criteria:
+        - "Runs record commit SHA."
+        - "Runs record seed."
+        - "Runs record hashes of all input files."
+
+  functional_requirements:
+    authentication:
+      - "Email/password auth (or magic link) for MVP."
+    workspace_connection:
+      - "User inputs public GitHub repo URL."
+      - "User inputs workspace_root folder path."
+      - "App fetches repo file tree for workspace_root."
+      - "App supports selecting a commit SHA or default branch HEAD."
+    experiment_discovery:
+      - "Scan workspace_root/experiments/*/experiment.yaml"
+      - "List experiments in UI with validation status."
+    validation:
+      - "Safe YAML parsing."
+      - "Schema validation for deck/policy/experiment."
+      - "Resolve references and validate existence within workspace_root."
+      - "Deck: basic constraints (>=60, qty integers)."
+      - "Policy: analytics templates validated (no code execution)."
+    simulation:
+      - "Run 1–10 games per experiment."
+      - "Deterministic by seed."
+      - "Policy-driven LLM selection uses internal keys for MVP."
+      - "Policy chooses actions from a menu (mtg-lite-v0)."
+    analytics:
+      - "Compute policy.analytics.outputs (declarative metrics)."
+      - "Render policy.analytics.report_template into markdown."
+    results_storage:
+      - "Store results.yaml and report.md internally per sim run."
+      - "Allow download from UI."
+      - "Store derived results JSON for dashboards."
+    optional_writeback_mvp:
+      - "If enabled, app can create PRs to public repos via a bot account."
+      - "This is disabled by default for MVP."
+
+  non_functional_requirements:
+    security:
+      - "No GitHub credentials required for public repos."
+      - "Internal LLM keys are protected and never exposed."
+      - "All user-provided repo URLs are sanitized."
+    performance:
+      - "Workspace discovery < 5 seconds for typical repos."
+      - "Scryfall lookups are cached."
+    reliability:
+      - "Job queue for simulations."
+      - "Graceful failure and retries for transient errors."
+    observability:
+      - "Metrics: run duration, validation time, LLM calls, failures."
+
+  pricing_and_packaging:
+    mvp_free:
+      features:
+        - "Public GitHub repo workspaces"
+        - "1–10 game sims"
+        - "Internal results storage + downloads"
+        - "Basic dashboards"
+      limits:
+        - "Daily run cap per user (configurable)"
+    paid_private:
+      features:
+        - "Private repos"
+        - "PR writeback"
+        - "User-managed LLM keys"
+        - "Team workspaces"
+        - "Higher run caps"
+        - "Premium analytics"
+      limits:
+        - "Based on plan tier"
+
+  risks:
+    - id: public_repo_abuse
+      description: "Users point to huge repos or spam invalid YAML."
+      mitigation:
+        - "Limit scanning scope to workspace_root"
+        - "Max file count and size limits"
+        - "Rate limiting"
+    - id: llm_costs
+      description: "Internal LLM keys incur cost."
+      mitigation:
+        - "Strict sim caps"
+        - "Menu-based decisions"
+        - "Caching and minimal calls"
+    - id: user_expectations
+      description: "Users expect full MTG rules."
+      mitigation:
+        - "Explicit documentation of mtg-lite limitations"
+        - "Supported mechanics list"

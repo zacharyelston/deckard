@@ -1,0 +1,151 @@
+workspace_spec:
+  version: "0.2"
+  name: "MTG Simulation Workspace Spec"
+  status: "draft"
+  updated_at: "2026-01-09"
+
+  operating_mode:
+    mvp:
+      repo_access: "public_only"
+      authentication_required: false
+      supported_sources:
+        - "public GitHub repositories via HTTPS"
+      writeback:
+        supported:
+          - "internal_storage_only"
+          - "download_results"
+        optional:
+          - "bot_pr_to_public_repo"
+    paid:
+      repo_access: "private_and_public"
+      authentication_required: true
+      supported_sources:
+        - "GitHub App installation"
+        - "PAT (optional)"
+        - "SSH (optional)"
+      writeback:
+        supported:
+          - "pr_to_repo"
+          - "direct_commit_to_repo"
+
+  goals:
+    - "Provide a GitHub-backed folder structure for decks, policies, experiments, and results."
+    - "Support public repos without requiring user GitHub tokens."
+    - "Enable reproducible simulation runs with commit SHA pinning."
+    - "Avoid secrets in-repo; LLM keys remain internal."
+
+  non_goals:
+    - "Implement a full MTG Comprehensive Rules engine."
+    - "Store or manage user LLM API keys in MVP."
+    - "Provide advanced repo permissions or private repo support in MVP."
+
+  terminology:
+    workspace_root: "Repo folder used as root for experiment assets."
+    experiment: "Folder containing experiment.yaml and optional results/ output folder."
+    deck_file: "YAML describing a deck list and constraints."
+    policy_file: "YAML describing agent configuration and analytics templates."
+    builtin_resource: "Read-only policy/deck shipped with the app."
+
+  security:
+    rules:
+      - "No secrets should be committed to the repo."
+      - "LLM keys are stored internally (developer-controlled) during MVP."
+      - "All references must resolve within workspace_root."
+    notes:
+      - "Public repos are fetched without user authentication."
+      - "Paid mode introduces authenticated GitHub access."
+
+  layout:
+    required_directories:
+      - "experiments/"
+      - "decks/"
+      - "policies/"
+    optional_directories:
+      - "presets/"
+      - "docs/"
+      - "schemas/"
+    canonical_tree_example:
+      - "X/"
+      - "X/experiments/exp-name/experiment.yaml"
+      - "X/experiments/exp-name/results/"
+      - "X/decks/deckname.yaml"
+      - "X/policies/policyname.yaml"
+
+  reference_scheme:
+    allowed_reference_types:
+      - "repo-relative paths (preferred): ../decks/mono-red.yaml"
+      - "repo:// URIs: repo://decks/mono-red.yaml"
+      - "builtin:// URIs: builtin://policies/random-baseline.yaml"
+    constraints:
+      - "Resolved references must remain inside workspace_root."
+      - "References must not include absolute filesystem paths."
+
+  file_types:
+    experiment:
+      filename: "experiment.yaml"
+      required_fields:
+        - "version"
+        - "name"
+        - "refs.deck"
+        - "refs.policy"
+        - "run.games"
+      optional_fields:
+        - "opponent"
+        - "run.seed"
+        - "run.ruleset"
+        - "output"
+        - "metadata"
+    deck:
+      filename_pattern: "decks/*.yaml"
+      required_fields:
+        - "version"
+        - "name"
+        - "mainboard"
+      optional_fields:
+        - "format"
+        - "sideboard"
+        - "metadata"
+    policy:
+      filename_pattern: "policies/*.yaml"
+      required_fields:
+        - "version"
+        - "name"
+        - "agent"
+        - "analytics"
+      optional_fields:
+        - "decision"
+        - "simulation_defaults"
+        - "metadata"
+    results:
+      filename_pattern: "experiments/*/results/*.yaml"
+      required_fields:
+        - "version"
+        - "sim_id"
+        - "inputs"
+        - "results"
+
+  validation:
+    yaml_parsing:
+      requirements:
+        - "Safe YAML parser with anchors/aliases disabled or constrained."
+        - "Maximum file size: 256KB."
+    experiment_validation:
+      rules:
+        - "run.games must be integer in [1,10] for MVP."
+        - "refs.deck and refs.policy must resolve and be valid YAML."
+    deck_validation:
+      rules:
+        - "mainboard quantities must be positive integers."
+        - "total cards must be >= 60 unless format overrides."
+        - "card names should resolve via Scryfall or cached data."
+    policy_validation:
+      rules:
+        - "agent.provider must be supported."
+        - "agent.model must be set (or use internal default for MVP)."
+        - "analytics.outputs must be declarative (no arbitrary code)."
+
+  reproducibility:
+    requirements:
+      - "Every simulation run records repo URL and commit SHA."
+      - "Results include deck/policy paths and their file hashes."
+      - "Results include ruleset and runner version."
