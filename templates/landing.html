@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}MTG Deck Tester - Run MTG Simulations{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-lg-8 text-center">
+        <h1 class="display-4 fw-bold mb-4">
+            Test Your <span style="color: var(--primary-color)">MTG Decks</span>
+        </h1>
+        <p class="lead text-secondary mb-5">
+            Connect your public GitHub repository, run simulations, and analyze your deck performance with AI-powered insights.
+        </p>
+        
+        <a href="{{ url_for('replit_auth.login') }}" class="btn btn-primary btn-lg px-5 py-3 mb-5">
+            Get Started
+        </a>
+        
+        <div class="row g-4 mt-4">
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="display-6 mb-3">1</div>
+                        <h5>Connect Repository</h5>
+                        <p class="text-secondary small">Point to a public GitHub repo containing your deck and policy files.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="display-6 mb-3">2</div>
+                        <h5>Run Simulations</h5>
+                        <p class="text-secondary small">Execute 1-10 games per experiment with reproducible results.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="display-6 mb-3">3</div>
+                        <h5>Analyze Results</h5>
+                        <p class="text-secondary small">View analytics reports and download results for further analysis.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

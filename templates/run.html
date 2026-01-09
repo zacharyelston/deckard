@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Run #{{ run.id }} - MTG Deck Tester{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1>Simulation Run #{{ run.id }}</h1>
+        <p class="text-secondary mb-0">
+            Experiment: {{ run.experiment.name }} | 
+            Status: <span class="badge bg-success">{{ run.status }}</span>
+        </p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('download_run_file', run_id=run.id, file_type='results') }}" class="btn btn-outline-primary">Download Results</a>
+        <a href="{{ url_for('download_run_file', run_id=run.id, file_type='report') }}" class="btn btn-outline-primary">Download Report</a>
+    </div>
+</div>
+
+<div class="row mb-4">
+    {% set stats = run.analytics_json | default('{}') | from_json %}
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="stat-value">{{ stats.wins | default(0) }}/{{ stats.total_games | default(0) }}</div>
+            <div class="stat-label">Wins</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="stat-value">{{ stats.win_rate | default(0) }}%</div>
+            <div class="stat-label">Win Rate</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="stat-value">{{ stats.avg_turns | default(0) }}</div>
+            <div class="stat-label">Avg Turns</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="stat-value">{{ stats.avg_damage_dealt | default(0) }}</div>
+            <div class="stat-label">Avg Damage</div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Report</h5>
+            </div>
+            <div class="card-body">
+                {% if run.report_md %}
+                    <div class="markdown-content">
+                        <pre style="white-space: pre-wrap;">{{ run.report_md }}</pre>
+                    </div>
+                {% else %}
+                    <p class="text-secondary">No report available.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Reproducibility Info</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Seed:</strong> <code>{{ run.seed }}</code></p>
+                <p><strong>Commit SHA:</strong> <code>{{ run.commit_sha[:8] if run.commit_sha else 'N/A' }}</code></p>
+                <p><strong>Games Requested:</strong> {{ run.games_requested }}</p>
+                <p><strong>Games Completed:</strong> {{ run.games_completed }}</p>
+                <p class="mb-0"><strong>Completed:</strong> {{ run.completed_at }}</p>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Additional Stats</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Avg Lands Played:</strong> {{ stats.avg_lands_played | default(0) }}</p>
+                <p><strong>Avg Creatures Played:</strong> {{ stats.avg_creatures_played | default(0) }}</p>
+                <p class="mb-0"><strong>Losses:</strong> {{ stats.losses | default(0) }} | <strong>Draws:</strong> {{ stats.draws | default(0) }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-3">
+    <a href="{{ url_for('view_experiment', experiment_id=run.experiment_id) }}" class="btn btn-outline-secondary">Back to Experiment</a>
+</div>
+{% endblock %}

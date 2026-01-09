@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}{{ experiment.name }} - MTG Deck Tester{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1>{{ experiment.name }}</h1>
+        <p class="text-secondary mb-0">
+            Path: <code>{{ experiment.path }}</code>
+        </p>
+    </div>
+    <div>
+        {% if experiment.is_valid %}
+            <span class="badge badge-valid fs-6 me-3">Valid</span>
+            <form action="{{ url_for('run_experiment', experiment_id=experiment.id) }}" method="POST" style="display:inline;">
+                <button type="submit" class="btn btn-primary">Run Simulation</button>
+            </form>
+        {% else %}
+            <span class="badge badge-invalid fs-6">Invalid</span>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        {% if not experiment.is_valid %}
+            <div class="card mb-4 border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">Validation Errors</h5>
+                </div>
+                <div class="card-body">
+                    {% set errors = experiment.validation_errors | default('[]') %}
+                    {% if errors %}
+                        <ul class="mb-0">
+                            {% for error in errors | from_json %}
+                                <li>
+                                    <strong>{{ error.field }}:</strong> {{ error.message }}
+                                    {% if error.line %}(line {{ error.line }}){% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Configuration</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Deck Reference:</strong>
+                        <br><code>{{ experiment.deck_ref or 'Not specified' }}</code>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Policy Reference:</strong>
+                        <br><code>{{ experiment.policy_ref or 'Not specified' }}</code>
+                    </div>
+                </div>
+                <div>
+                    <strong>Games per Run:</strong> {{ experiment.games_count }}
+                </div>
+            </div>
+        </div>
+        
+        {% if experiment.raw_yaml %}
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Raw YAML</h5>
+                </div>
+                <div class="card-body">
+                    <pre><code>{{ experiment.raw_yaml }}</code></pre>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Simulation Runs</h5>
+            </div>
+            <div class="card-body">
+                {% if runs %}
+                    <ul class="list-group list-group-flush">
+                        {% for run in runs %}
+                            <li class="list-group-item bg-transparent border-secondary">
+                                <a href="{{ url_for('view_run', run_id=run.id) }}" class="text-light text-decoration-none">
+                                    Run #{{ run.id }}
+                                </a>
+                                <span class="badge bg-success ms-2">{{ run.status }}</span>
+                                <br>
+                                <small class="text-secondary">
+                                    {{ run.games_completed }} games | Seed: {{ run.seed }}
+                                </small>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-secondary text-center py-3 mb-0">No runs yet. Run a simulation to see results here.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-3">
+    <a href="{{ url_for('view_workspace', workspace_id=workspace.id) }}" class="btn btn-outline-secondary">Back to Workspace</a>
+</div>
+{% endblock %}
