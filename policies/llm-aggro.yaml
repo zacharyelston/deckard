@@ -1,0 +1,58 @@
+version: "0.1"
+kind: "policy"
+name: "LLM Aggro Pilot (Example)"
+
+agent:
+  type: "llm"
+  provider: "openai"
+  model: "gpt-4.1-mini"
+  temperature: 0.2
+
+decision:
+  mode: "menu"                 # choose only from legal actions list
+  max_retries: 2               # if illegal output, retry with error context
+  fallback_policy: "builtin://policies/random-baseline.yaml"
+
+simulation_defaults:
+  ruleset: "mtg-lite-v0"
+  max_turns: 12
+  action_budget_per_turn: 1    # keep LLM calls bounded
+  response_budget_tokens: 400  # app-enforced
+
+analytics:
+  outputs:
+    - id: "games"
+      type: "count"
+      field: "games"
+    - id: "wins"
+      type: "count_where"
+      field: "outcome"
+      equals: "win"
+    - id: "losses"
+      type: "count_where"
+      field: "outcome"
+      equals: "loss"
+    - id: "win_rate"
+      type: "ratio"
+      numerator: "wins"
+      denominator: "games"
+    - id: "avg_turns"
+      type: "mean"
+      field: "turns"
+    - id: "avg_mulligans"
+      type: "mean"
+      field: "mulligans"
+
+  report_template: |
+    # Simulation Report: {{name}}
+
+    **Games:** {{games}}
+    **Wins:** {{wins}}
+    **Losses:** {{losses}}
+    **Win rate:** {{win_rate}}
+    **Avg turns:** {{avg_turns}}
+    **Avg mulligans:** {{avg_mulligans}}
+
+metadata:
+  tags: ["llm", "aggro", "example"]
+  description: "Example LLM pilot policy using menu-based action selection."
