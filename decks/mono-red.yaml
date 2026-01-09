@@ -1,0 +1,36 @@
+version: "0.1"
+kind: "deck"
+name: "Mono Red Aggro (Example)"
+
+format:
+  min_cards: 60
+  max_copies: 4
+  allow_sets: []          # empty = any (MVP)
+  allow_sideboard: false  # MVP default
+
+mainboard:
+  - card: "Mountain"
+    qty: 24
+  - card: "Lightning Bolt"
+    qty: 4
+  - card: "Monastery Swiftspear"
+    qty: 4
+  - card: "Goblin Guide"
+    qty: 4
+  - card: "Rift Bolt"
+    qty: 4
+  - card: "Lava Spike"
+    qty: 4
+  - card: "Skewer the Critics"
+    qty: 4
+  - card: "Eidolon of the Great Revel"
+    qty: 4
+  - card: "Searing Blaze"
+    qty: 4
+
+sideboard: []
+
+metadata:
+  tags: ["aggro", "red", "example"]
+  author: "example-user"
+  description: "Example list for testing deck parsing and Scryfall name resolution."

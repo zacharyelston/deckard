@@ -1,0 +1,26 @@
+version: "0.1"
+kind: "experiment"
+name: "Mono Red vs Baseline (Example)"
+
+refs:
+  deck: "../../decks/mono-red.yaml"
+  policy: "../../policies/llm-aggro.yaml"
+
+opponent:
+  deck: "builtin://decks/baseline-midrange.yaml"
+  policy: "builtin://policies/random-baseline.yaml"
+
+run:
+  games: 5
+  seed: 12345
+  ruleset: "mtg-lite-v0"
+  max_turns: 12
+
+output:
+  results_dir: "./results"
+  storage: "internal"   # MVP default: internal storage + download
+  writeback: "none"     # options: none | bot_pr (optional later)
+
+metadata:
+  tags: ["example", "public-repo", "mvp"]
+  notes: "This experiment is designed to validate repo discovery + YAML parsing end-to-end."

@@ -1,0 +1,98 @@
+version: "0.1"
+kind: "results"
+sim_id: "sim_01JABCDEF1234567890"
+created_at: "2026-01-09T15:33:22Z"
+
+inputs:
+  repo:
+    url: "https://github.com/example-user/mtg-sim-workspace"
+    workspace_root: "X/"
+    commit_sha: "abcdef1234567890abcdef1234567890abcdef12"
+
+  experiment:
+    path: "experiments/mono-red-vs-baseline/experiment.yaml"
+    name: "Mono Red vs Baseline (Example)"
+
+  deck:
+    path: "decks/mono-red.yaml"
+    file_hash: "sha256:1111111111111111111111111111111111111111111111111111111111111111"
+
+  policy:
+    path: "policies/llm-aggro.yaml"
+    file_hash: "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+
+  opponent:
+    deck: "builtin://decks/baseline-midrange.yaml"
+    policy: "builtin://policies/random-baseline.yaml"
+
+  run:
+    games: 5
+    seed: 12345
+    ruleset: "mtg-lite-v0"
+    max_turns: 12
+
+  runner:
+    name: "mtg-sim-runner"
+    version: "0.1.0"
+    ruleset_version: "mtg-lite-v0@0.1"
+
+results:
+  aggregates:
+    games: 5
+    wins: 3
+    losses: 2
+    win_rate: 0.6
+    avg_turns: 7.4
+    avg_mulligans: 0.2
+
+  games:
+    - game_id: 1
+      outcome: "win"
+      turns: 8
+      mulligans: 0
+      key_events:
+        - "T1: play land"
+        - "T2: cast threat"
+        - "T4: attack for lethal setup"
+        - "T8: lethal"
+      final_state:
+        player_life: 6
+        opponent_life: 0
+
+    - game_id: 2
+      outcome: "loss"
+      turns: 9
+      mulligans: 1
+      key_events:
+        - "T1: mulligan"
+        - "T5: opponent stabilized"
+        - "T9: player out of reach"
+      final_state:
+        player_life: 0
+        opponent_life: 4
+
+  analytics:
+    computed:
+      games: 5
+      wins: 3
+      losses: 2
+      win_rate: 0.6
+      avg_turns: 7.4
+      avg_mulligans: 0.2
+
+  report_markdown: |
+    # Simulation Report: Mono Red vs Baseline (Example)
+
+    **Games:** 5  
+    **Wins:** 3  
+    **Losses:** 2  
+    **Win rate:** 0.6  
+    **Avg turns:** 7.4  
+    **Avg mulligans:** 0.2
+
+artifacts:
+  downloads:
+    - name: "results.yaml"
+      type: "application/yaml"
+    - name: "report.md"
+      type: "text/markdown"
