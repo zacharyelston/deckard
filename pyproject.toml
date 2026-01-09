@@ -1,0 +1,16 @@
+[project]
+name = "deckard"
+version = "0.1.0"
+description = "Public GitHub Experiments Runner (MTG Deck Tester)"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "PyYAML>=6.0",
+]
+
+[project.scripts]
+deckard = "deckard.cli:main"
+
+[build-system]
+requires = ["hatchling>=1.21.1"]
+build-backend = "hatchling.build"

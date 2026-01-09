@@ -1,0 +1,13 @@
+version: "0.1"
+name: "Quickstart: Mono Red vs Baseline"
+
+refs:
+  deck: "repo://decks/mono-red.yaml"
+  policy: "repo://policies/llm-aggro.yaml"
+
+run:
+  games: 3
+  seed: 12345
+
+metadata:
+  description: "Starter experiment for validating workspace discovery."
